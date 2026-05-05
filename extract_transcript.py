@@ -121,6 +121,23 @@ def main():
         driver.get(company['url'])
         time.sleep(5)
         
+        # Scroll to load all transcripts
+        print("   Scrolling to load older transcripts...")
+        last_height = driver.execute_script("return document.body.scrollHeight")
+        while True:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(3) # Wait for content to load
+            
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                # Wait a bit more just in case of slow network, and check again
+                time.sleep(3)
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if new_height == last_height:
+                    break
+            last_height = new_height
+        
+        print("   Finished scrolling.")
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         links = []
         for a in soup.find_all('a', href=True):
