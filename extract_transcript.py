@@ -23,11 +23,10 @@ BASE_FOLDER = "webscrape"
 def sanitize_filename(filename):
     return re.sub(r'[\\/*?:"<>|]', "", filename).strip()
 
-def save_transcript_as_pdf(title, article_html, folder_path):
-    """Saves transcript as a formatted Word doc, converts to PDF, then cleans up."""
+def save_transcript_as_docx(title, article_html, folder_path):
+    """Saves transcript as a formatted Word doc."""
     safe_title = sanitize_filename(title)
     docx_path = os.path.join(folder_path, f"{safe_title}.docx")
-    pdf_path = os.path.join(folder_path, f"{safe_title}.pdf")
     
     doc = Document()
     doc.add_heading(title, level=1)
@@ -88,18 +87,8 @@ def save_transcript_as_pdf(title, article_html, folder_path):
             
         last_text = text
 
-    # Save temp docx
+    # Save docx
     doc.save(docx_path)
-    
-    # Convert to PDF
-    try:
-        print(f"      -> Converting to PDF...")
-        # Keep_active=True helps prevent Word popups from breaking the script
-        convert(docx_path, pdf_path)
-        # Delete the Word file to keep folder clean
-        os.remove(docx_path)
-    except Exception as e:
-        print(f"      ! PDF Conversion failed: {e}")
 
 def main():
     options = Options()
@@ -149,11 +138,11 @@ def main():
 
         print(f"Found {len(links)} transcripts.")
 
-        # 3. Download and Convert
+        # 3. Download and Save as DOCX
         for i, url in enumerate(links, 1):
             print(f"   [{i}/{len(links)}] Downloading...")
             driver.get(url)
-            time.sleep(4)
+            time.sleep(2) # Reduced from 4s to 2s
             
             inner_soup = BeautifulSoup(driver.page_source, 'html.parser')
             title = inner_soup.find('h1').get_text(strip=True) if inner_soup.find('h1') else f"Transcript_{i}"
@@ -161,10 +150,26 @@ def main():
             article_div = inner_soup.find('article') or inner_soup.find('div', id='newsContent')
             
             if article_div:
-                save_transcript_as_pdf(title, str(article_div), comp_folder)
-                print(f"   ✓ Finished PDF: {title[:40]}...")
+                save_transcript_as_docx(title, str(article_div), comp_folder)
+                print(f"   ✓ Saved DOCX: {title[:40]}...")
             else:
                 print(f"   ! Content not found.")
+                
+        # 4. Batch Convert DOCX to PDF (Much Faster!)
+        print(f"\n   -> Batch converting all Word docs to PDF for {company['name']}...")
+        try:
+            convert(comp_folder)
+        except Exception as e:
+            print(f"   ! Batch PDF Conversion failed: {e}")
+            
+        # Clean up temporary DOCX files
+        print(f"   -> Cleaning up temporary files...")
+        for filename in os.listdir(comp_folder):
+            if filename.endswith(".docx"):
+                try:
+                    os.remove(os.path.join(comp_folder, filename))
+                except:
+                    pass
 
     print("\n--- ALL TASKS FINISHED ---")
     driver.quit()
