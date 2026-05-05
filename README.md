@@ -1,46 +1,52 @@
-# MarketScreener Transcript Scraper
+# Financial Transcript Automation Pipeline
 
 ## Description
-This project is a high-performance Python-based web scraper and automation tool designed to collect financial transcripts (earnings calls, investor conferences, etc.) from MarketScreener. It automates the process of navigating through multiple companies, identifying transcript links, and extracting the full text.
+This project is a high-performance automation pipeline built with Python and Selenium to extract, format, and archive financial transcripts from MarketScreener. It handles the full lifecycle of data collection, from bypassing paywalls via authenticated sessions to generating professionally formatted PDFs.
 
-The script goes beyond simple scraping by performing "intelligent parsing." It identifies speaker names and job titles, applying professional formatting (bolding names, italicizing titles) before generating a final polished PDF document. This tool is ideal for financial analysts, researchers, or investors who need to archive and read transcripts offline without the tedious manual "copy-paste" process.
+This version introduces a high-performance, two-phase process: first, it rapidly scrapes and saves all transcripts as formatted `.docx` files. Second, it performs a single batch operation to convert all documents to PDF, dramatically reducing processing time and system overhead.
 
-## Features
-- **Multi-Company Support:** Scrape transcripts for an unlimited list of companies in one run.
-- **Paywall Bypass:** Uses a manual session trigger to allow users to log in with their own credentials before the scraping begins.
+## Key Features
+- **Dynamic List Discovery:** Implements an infinite scroll loop to capture years of historical transcript data, not just what's initially visible.
+- **Paywall-Aware Session:** Uses a manual trigger to allow users to log in securely before the automation takes over.
 - **Intelligent Formatting:** 
-    - Detects speaker blocks automatically.
-    - Bolds speaker names.
-    - Small, italicized font for job titles (e.g., *CFO*, *VP of Engineering*).
-- **Automated PDF Generation:** Converts formatted Word documents directly to PDF and cleans up temporary files automatically.
-- **Organized Storage:** Automatically creates separate folders for each company (e.g., `/webscrape/CISCO/`, `/webscrape/VEEVA/`).
+    - Automatically identifies "Speech Blocks" via CSS class analysis (`.txt-bold`, `speech-xxxxx`).
+    - Applies bold styling to speaker names and italicized, condensed font for executive titles.
+- **High-Performance Batch Conversion:** Separates scraping from conversion. All transcripts for a company are saved as DOCX first, then converted to PDF in a single, fast batch operation.
+- **Automated Cleanup:** Automatically deletes the temporary `.docx` files after the PDF conversion is complete, leaving a clean output directory.
+
+## Workflow
+The script follows a robust, multi-stage process for each company:
+
+`[Navigate & Login]` **->** `[Scroll to Load All Links]` **->** `[Loop & Save All as DOCX]` **->** `[Batch Convert to PDF]` **->** `[Cleanup DOCX Files]`
 
 ## Technologies Used
 - **Python**
-- **Selenium:** For browser automation and dynamic content loading.
-- **BeautifulSoup4:** For advanced HTML parsing and speaker detection.
-- **python-docx:** To programmatically build and style documents.
-- **docx2pdf:** For professional-grade PDF conversion.
-- **Webdriver Manager:** To handle automatic Chrome driver updates.
+- **Selenium & Webdriver Manager:** For dynamic browser automation and scroll handling.
+- **BeautifulSoup4:** For advanced HTML parsing and speaker identification.
+- **python-docx:** For programmatic document construction and typography.
+- **docx2pdf:** Used for its efficient batch-folder conversion capabilities.
 
 ## Installation
-Ensure you have **Google Chrome** and **Microsoft Word** installed (Word is required by the `docx2pdf` library for the conversion process).
+*Note: This script requires **Microsoft Word** to be installed on the host machine for PDF conversion.*
 
-1. Clone this repository or download the script.
-2. Install the required libraries:
-```bash
-pip install selenium webdriver-manager beautifulsoup4 python-docx docx2pdf
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/Financial-Transcript-Automator.git
+   ```
+2. Install dependencies:
+   ```bash
+   pip install selenium webdriver-manager beautifulsoup4 python-docx docx2pdf
+   ```
 
-## Instructions
-1. Open `extract_transcript.py` and add your target MarketScreener URLs to the `COMPANIES` list.
-2. Run the script:
+## Usage
+1. Open the script and update the `COMPANIES` list with your target MarketScreener URLs.
+2. Run the script from your terminal:
    ```bash
    python extract_transcript.py
    ```
 3. A Chrome window will open. Log in to your account and accept any cookie banners.
-4. Once you are on the transcript list page, return to your terminal and type `READY`.
-5. The script will automatically scroll to the bottom of the history, extract all links, and begin the download/conversion process.
+4. Once you are logged in, return to your terminal and type `READY` to start the automation.
+5. The script will handle the rest, creating subfolders for each company in the `webscrape` directory filled with the final PDF transcripts.
 
 ## Disclaimer
-This tool is intended for personal research and archival purposes. Always respect the Terms of Service of the website being scraped.
+This project is for educational and personal research purposes only. Users are responsible for ensuring their use of the tool complies with the target website's Terms of Service.
