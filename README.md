@@ -32,14 +32,15 @@ Ensure you have **Google Chrome** and **Microsoft Word** installed (Word is requ
 pip install selenium webdriver-manager beautifulsoup4 python-docx docx2pdf
 ```
 
-## Usage
-1. **Configure Companies:** Open the script and update the `COMPANIES` list with the names and URLs of the "News & Call Transcripts" pages you wish to scrape.
-2. **Run the Script:**
-```bash
-python extract_transcript.py
-```
-3. **Login:** A Chrome window will open. Log in to your MarketScreener account.
-4. **Trigger:** Once you are logged in and looking at the transcripts list, go back to your terminal and type `READY` to start the automation.
+## Instructions
+1. Open `extract_transcript.py` and add your target MarketScreener URLs to the `COMPANIES` list.
+2. Run the script:
+   ```bash
+   python extract_transcript.py
+   ```
+3. A Chrome window will open. Log in to your account and accept any cookie banners.
+4. Once you are on the transcript list page, return to your terminal and type `READY`.
+5. The script will automatically scroll to the bottom of the history, extract all links, and begin the download/conversion process.
 
 ## Disclaimer
 This tool is intended for personal research and archival purposes. Always respect the Terms of Service of the website being scraped.
